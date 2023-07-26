@@ -10,10 +10,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
-    # env:
-    #   VITE_SERVICE_EMAIL: ${{ secrets.VITE_SERVICE_EMAIL }}
-    #   VITE_TEMPLATE_EMAIL: ${{ secrets.VITE_TEMPLATE_EMAIL }}
-    #   VITE_PUBLIC_EMAIL: ${{ secrets.VITE_PUBLIC_EMAIL }}
+    env:
+      VITE_API_KEY: ${{ secrets.VITE_API_KEY }}
+      VITE_GEO_URL: ${{ secrets.VITE_GEO_URL }}
+      VITE_WEATHER_URL: ${{ secrets.VITE_WEATHER_URL }}
 
     steps:
       - name: Checkout repo
