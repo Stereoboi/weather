@@ -5,7 +5,7 @@ import { weatherFetch } from "../helpers/weatherFetch";
 
 const findCity = async (city: string) => {
   const result = await weatherFetch(city);
-  console.log(result);
+  console.log("RESULT", result);
 };
 </script>
 
