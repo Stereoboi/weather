@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Input from "../components/Input.vue";
+import Modal from "../components/Modal.vue";
 import { weatherFetch } from "../helpers/weatherFetch";
 import { WeatherData } from "../../types/weatherFetch";
 import Card from "../components/Card.vue";
@@ -91,41 +92,15 @@ const removeData = (city: WeatherData) => {
     </div>
   </div>
 
-  <div v-if="showModal" class="modal">
-    <div class="modal-content">
-      <p>Are you sure you want to remove this city from workspace?</p>
-      <button @click="removeData(cityToDelete)" v-if="cityToDelete">Yes</button>
-      <button @click="hideConfirmationModal">No</button>
-    </div>
-  </div>
+  <Modal
+    v-if="showModal && cityToDelete"
+    @confirm="removeData(cityToDelete)"
+    @cancel="hideConfirmationModal"
+  />
 </template>
 
 <style>
 .wrapper {
   display: flex;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-.modal button {
-  margin: 10px;
 }
 </style>
