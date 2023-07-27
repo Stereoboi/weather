@@ -12,10 +12,14 @@ const isDataLoaded = ref(false);
 const showModal = ref(false);
 const cityToDelete = ref<WeatherData | null>(null);
 const chosenCities = ref<WeatherData[]>([]);
+const favoriteCities = ref<WeatherData[]>([]);
 
 onMounted(() => {
   const workspaceData = localStorage.getItem("WORKSPACE_DATA");
-
+  const favoriteData = localStorage.getItem("FAVORITE_DATA");
+  if (favoriteData) {
+    favoriteCities.value = JSON.parse(favoriteData);
+  }
   if (workspaceData) {
     chosenCities.value = JSON.parse(workspaceData);
   }
@@ -38,15 +42,64 @@ const findCity = async (city: string) => {
   cardData.value = result;
   isDataLoaded.value = true;
 };
-const addData = () => {
+// const addDataToWorkspace = () => {
+//   if (cardData.value && chosenCities.value.length <= 4) {
+//     if (chosenCities.value.includes(cardData.value)) {
+//       alert("alredy exist");
+//       return;
+//     }
+//     chosenCities.value.push(cardData.value);
+//     localStorage.setItem("WORKSPACE_DATA", JSON.stringify(chosenCities.value));
+//     console.log("Data added to chosenCities:", chosenCities.value);
+//   }
+// };
+
+const addDataToWorkspace = () => {
   if (cardData.value && chosenCities.value.length <= 4) {
-    if (chosenCities.value.includes(cardData.value)) {
-      alert("alredy exist");
+    const cityExists = chosenCities.value.some(
+      (city) => city && city.name === cardData.value!.name
+    );
+
+    if (cityExists) {
+      alert("City already exists in workspace");
       return;
     }
+
     chosenCities.value.push(cardData.value);
     localStorage.setItem("WORKSPACE_DATA", JSON.stringify(chosenCities.value));
     console.log("Data added to chosenCities:", chosenCities.value);
+  }
+};
+
+// const addToFavorite = (data: WeatherData) => {
+//   console.log(favoriteCities.value);
+
+//   if (favoriteCities.value.length <= 4) {
+//     if (favoriteCities.value.includes(data)) {
+//       alert("alredy exist");
+
+//       return;
+//     }
+//     favoriteCities.value.push(data);
+//     localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
+//     console.log("Data added to chosenCities:", favoriteCities.value);
+//   }
+// };
+
+const addToFavorite = (data: WeatherData) => {
+  if (favoriteCities.value.length <= 4) {
+    const cityExists = favoriteCities.value.some(
+      (city) => city.name === data.name
+    );
+
+    if (cityExists) {
+      alert("City already exists in favorites");
+      return;
+    }
+
+    favoriteCities.value.push(data);
+    localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
+    console.log("Data added to favoriteCities:", favoriteCities.value);
   }
 };
 const removeData = (city: WeatherData) => {
@@ -67,10 +120,10 @@ const removeData = (city: WeatherData) => {
     <div v-if="isDataLoaded && cardData">
       <Card :cardData="cardData" :hideButton="false">
         <template #add-button>
-          <button @click="addData">Add to workspace</button>
+          <button @click="addDataToWorkspace">Add to workspace</button>
         </template>
         <template #make-favorite>
-          <button>Add to favorite</button>
+          <button @click="addToFavorite(cardData)">Add to favorite</button>
         </template>
       </Card>
     </div>
@@ -86,7 +139,7 @@ const removeData = (city: WeatherData) => {
           </button>
         </template>
         <template #make-favorite-ws>
-          <button>Add to favorite</button>
+          <button @click="addToFavorite(city)">Add to favorite</button>
         </template>
       </Card>
     </div>
