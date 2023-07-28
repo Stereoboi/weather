@@ -103,10 +103,12 @@ const addToFavorite = (data: WeatherData) => {
   }
 };
 const removeData = (city: WeatherData) => {
-  chosenCities.value = chosenCities.value.filter(
+  const result = (chosenCities.value = chosenCities.value.filter(
     (item) => item.name !== city.name
-  );
-  localStorage.setItem("WORKSPACE_DATA", JSON.stringify(chosenCities.value));
+  ));
+  console.log(result);
+
+  localStorage.setItem("WORKSPACE_DATA", JSON.stringify(result));
   hideConfirmationModal();
   console.log("Data removed from chosenCities:", chosenCities.value);
 };
