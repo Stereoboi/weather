@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import { WeatherData } from "../../types/weatherFetch";
-
-defineProps<{
+// import { onMounted } from "vue";
+const props = defineProps<{
   cardData: WeatherData;
   hideButton: boolean;
 }>();
+
+const IMG_URL = import.meta.env.VITE_IMG_URL;
+
+console.log(props.cardData);
 </script>
 
 <template>
   <h2>{{ cardData.name }}</h2>
+  <img
+    :src="`${IMG_URL}${cardData.weather[0].icon}@2x.png`"
+    :alt="cardData.weather[0].description"
+  />
   <p>Weather: {{ cardData.weather[0].description }}</p>
   <p>Temperature: {{ cardData.main.temp }} °C</p>
   <p>Humidity: {{ cardData.main.humidity }}%</p>

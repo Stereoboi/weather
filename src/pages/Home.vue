@@ -2,12 +2,16 @@
 import { ref } from "vue";
 import Input from "../components/Input.vue";
 import Modal from "../components/Modal.vue";
-import { weatherFetch } from "../helpers/weatherFetch";
+import Chart from "../components/Chart.vue";
+import { weatherFetch, dailyTempFetch } from "../helpers/weatherFetch";
 import { WeatherData } from "../../types/weatherFetch";
 import Card from "../components/Card.vue";
 import { onMounted } from "vue";
+import moment from "moment";
+// import Chart from "../components/Chart.vue";
 
 const cardData = ref<WeatherData | null>(null);
+const tempData = ref(null);
 const isDataLoaded = ref(false);
 const showModal = ref(false);
 const cityToDelete = ref<WeatherData | null>(null);
@@ -40,7 +44,13 @@ const hideConfirmationModal = () => {
 // запит до АРІ для отримання погодних даних
 const findCity = async (city: string) => {
   const result = await weatherFetch(city);
+  const resultTemp = await dailyTempFetch(city);
+  // moment(resultTemp.list[0].dt).format("MMM Do YY");
+  console.log(moment.unix(resultTemp.list[2].dt).format("Do , h"));
+  console.log(resultTemp);
+
   cardData.value = result;
+  tempData.value = resultTemp;
   isDataLoaded.value = true;
 };
 // функція додавання погодної картки до робочого середовища
@@ -66,16 +76,16 @@ const addDataToWorkspace = () => {
   }
 };
 
-/* 
-isFavorite - ця функція використовується 
+/*
+isFavorite - ця функція використовується
 для перевірки того чи є обране місто додане в категорію улюблених.
 Для того щоб була змога відображати правильний стан кнопки.
 логіка наступна :
 1-якщо користувач додає місто вперше то favoriteCities.value буде пустим масивом,
 а отже картка створиться в workspace із неактивними значеннями кнопок і isFavorite буде відсутнім.
-2-якщо користувач додав місто до колекції favorite але видалив її з workspace та потім знову додає 
+2-якщо користувач додав місто до колекції favorite але видалив її з workspace та потім знову додає
 те ж саме місто до workspace то функція isFavorite провіряє чи в колекції favorite присутнє це місто
- і якщо так воно і є то ми записуємо значення isFavorite = true; в об'єк із даними про це місто, 
+ і якщо так воно і є то ми записуємо значення isFavorite = true; в об'єк із даними про це місто,
  що дозволяє відобразити кнопку в правильному доданому стані і запобігти повторного додавання міста
 */
 
@@ -111,13 +121,13 @@ const addToFavorite = (data: WeatherData) => {
   }
 };
 
-/* 
-isAdded - ця функція використовується 
+/*
+isAdded - ця функція використовується
 для перевірки того чи є обране місто додане в категорію робочого середовища(workspace).
 Для того щоб була змога відображати правильний стан кнопки.
 логіка наступна :
-1- при додаванні міста в улюблені ми провіряємо колекцію workspace для того 
-щоб додати до об'єкту із данимим isFavorite = true; щоб на робочому середовищі( workspace) 
+1- при додаванні міста в улюблені ми провіряємо колекцію workspace для того
+щоб додати до об'єкту із данимим isFavorite = true; щоб на робочому середовищі( workspace)
 кнопки відображали стан погодної картки
 */
 
@@ -145,10 +155,10 @@ const removeData = (city: WeatherData) => {
 </script>
 
 <template>
+  <Chart :tempData="tempData" />
   <div>
     <h1>HOME PAGE</h1>
     <Input @findCity="findCity" />
-
     <div v-if="isDataLoaded && cardData">
       <Card :cardData="cardData" :hideButton="false">
         <template #add-button>
@@ -189,6 +199,6 @@ const removeData = (city: WeatherData) => {
 
 <style>
 .wrapper {
-  display: flex;
+  /* display: flex; */
 }
 </style>
