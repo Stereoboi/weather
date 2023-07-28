@@ -1,4 +1,5 @@
 export interface WeatherData {
+  isFavorite: boolean;
   coord: {
     lon: number;
     lat: number;

@@ -11,7 +11,7 @@ const cardData = ref<WeatherData | null>(null);
 const isDataLoaded = ref(false);
 const showModal = ref(false);
 const cityToDelete = ref<WeatherData | null>(null);
-const chosenCities = ref<WeatherData[]>([]);
+const workspaceCities = ref<WeatherData[]>([]);
 const favoriteCities = ref<WeatherData[]>([]);
 
 onMounted(() => {
@@ -21,7 +21,7 @@ onMounted(() => {
     favoriteCities.value = JSON.parse(favoriteData);
   }
   if (workspaceData) {
-    chosenCities.value = JSON.parse(workspaceData);
+    workspaceCities.value = JSON.parse(workspaceData);
   }
 });
 
@@ -37,26 +37,16 @@ const hideConfirmationModal = () => {
   showModal.value = false;
 };
 
+// запит до АРІ для отримання погодних даних
 const findCity = async (city: string) => {
   const result = await weatherFetch(city);
   cardData.value = result;
   isDataLoaded.value = true;
 };
-// const addDataToWorkspace = () => {
-//   if (cardData.value && chosenCities.value.length <= 4) {
-//     if (chosenCities.value.includes(cardData.value)) {
-//       alert("alredy exist");
-//       return;
-//     }
-//     chosenCities.value.push(cardData.value);
-//     localStorage.setItem("WORKSPACE_DATA", JSON.stringify(chosenCities.value));
-//     console.log("Data added to chosenCities:", chosenCities.value);
-//   }
-// };
-
+// функція додавання погодної картки до робочого середовища
 const addDataToWorkspace = () => {
-  if (cardData.value && chosenCities.value.length <= 4) {
-    const cityExists = chosenCities.value.some(
+  if (cardData.value && workspaceCities.value.length <= 4) {
+    const cityExists = workspaceCities.value.some(
       (city) => city && city.name === cardData.value!.name
     );
 
@@ -65,26 +55,41 @@ const addDataToWorkspace = () => {
       return;
     }
 
-    chosenCities.value.push(cardData.value);
-    localStorage.setItem("WORKSPACE_DATA", JSON.stringify(chosenCities.value));
-    console.log("Data added to chosenCities:", chosenCities.value);
+    isFavorite(cardData.value);
+    console.log(cardData.value);
+    workspaceCities.value.push(cardData.value);
+    localStorage.setItem(
+      "WORKSPACE_DATA",
+      JSON.stringify(workspaceCities.value)
+    );
+    console.log("Data added to workspaceCities:", workspaceCities.value);
   }
 };
 
-// const addToFavorite = (data: WeatherData) => {
-//   console.log(favoriteCities.value);
+/* 
+isFavorite - ця функція використовується 
+для перевірки того чи є обране місто додане в категорію улюблених.
+Для того щоб була змога відображати правильний стан кнопки.
+логіка наступна :
+1-якщо користувач додає місто вперше то favoriteCities.value буде пустим масивом,
+а отже картка створиться в workspace із неактивними значеннями кнопок і isFavorite буде відсутнім.
+2-якщо користувач додав місто до колекції favorite але видалив її з workspace та потім знову додає 
+те ж саме місто до workspace то функція isFavorite провіряє чи в колекції favorite присутнє це місто
+ і якщо так воно і є то ми записуємо значення isFavorite = true; в об'єк із даними про це місто, 
+ що дозволяє відобразити кнопку в правильному доданому стані і запобігти повторного додавання міста
+*/
 
-//   if (favoriteCities.value.length <= 4) {
-//     if (favoriteCities.value.includes(data)) {
-//       alert("alredy exist");
+const isFavorite = (data: WeatherData) => {
+  console.log(favoriteCities.value);
 
-//       return;
-//     }
-//     favoriteCities.value.push(data);
-//     localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
-//     console.log("Data added to chosenCities:", favoriteCities.value);
-//   }
-// };
+  for (const city of favoriteCities.value) {
+    if (city.name === data.name) {
+      data.isFavorite = true;
+      break; // Місто знайдено, виходимо з циклу, щоб оновити лиш перше місто
+    }
+  }
+  // localStorage.setItem("WORKSPACE_DATA", JSON.stringify(favoriteCities.value));
+};
 
 const addToFavorite = (data: WeatherData) => {
   if (favoriteCities.value.length <= 4) {
@@ -96,21 +101,46 @@ const addToFavorite = (data: WeatherData) => {
       alert("City already exists in favorites");
       return;
     }
+    data.isFavorite = true;
+
+    isAdded(data);
 
     favoriteCities.value.push(data);
     localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
     console.log("Data added to favoriteCities:", favoriteCities.value);
   }
 };
-const removeData = (city: WeatherData) => {
-  const result = (chosenCities.value = chosenCities.value.filter(
-    (item) => item.name !== city.name
-  ));
-  console.log(result);
 
-  localStorage.setItem("WORKSPACE_DATA", JSON.stringify(result));
+/* 
+isAdded - ця функція використовується 
+для перевірки того чи є обране місто додане в категорію робочого середовища(workspace).
+Для того щоб була змога відображати правильний стан кнопки.
+логіка наступна :
+1- при додаванні міста в улюблені ми провіряємо колекцію workspace для того 
+щоб додати до об'єкту із данимим isFavorite = true; щоб на робочому середовищі( workspace) 
+кнопки відображали стан погодної картки
+*/
+
+const isAdded = (data: WeatherData) => {
+  console.log(workspaceCities.value);
+
+  for (const city of workspaceCities.value) {
+    if (city.name === data.name) {
+      city.isFavorite = true;
+
+      break; // Місто знайдено, вийдіть з циклу, щоб оновити тільки перше місто
+    }
+  }
+  localStorage.setItem("WORKSPACE_DATA", JSON.stringify(workspaceCities.value));
+};
+
+const removeData = (city: WeatherData) => {
+  workspaceCities.value = workspaceCities.value.filter(
+    (item) => item.name !== city.name
+  );
+  localStorage.setItem("WORKSPACE_DATA", JSON.stringify(workspaceCities.value));
   hideConfirmationModal();
-  console.log("Data removed from chosenCities:", chosenCities.value);
+  console.log("Data removed from workspaceCities:", workspaceCities.value);
 };
 </script>
 
@@ -131,9 +161,9 @@ const removeData = (city: WeatherData) => {
     </div>
     <p v-else-if="isDataLoaded">Sorry, no data available.</p>
   </div>
-  <div v-if="chosenCities.length > 0" class="wrapper">
+  <div v-if="workspaceCities.length > 0" class="wrapper">
     <h2>Chosen Cities</h2>
-    <div v-for="city in chosenCities" :key="city.name">
+    <div v-for="city in workspaceCities" :key="city.name">
       <Card :cardData="city" :hideButton="true">
         <template #remove-workspace>
           <button @click="showConfirmationModal(city)">
@@ -141,7 +171,10 @@ const removeData = (city: WeatherData) => {
           </button>
         </template>
         <template #make-favorite-ws>
-          <button @click="addToFavorite(city)">Add to favorite</button>
+          <button v-if="!city.isFavorite" @click="addToFavorite(city)">
+            Add to favorite
+          </button>
+          <span v-else>Added</span>
         </template>
       </Card>
     </div>

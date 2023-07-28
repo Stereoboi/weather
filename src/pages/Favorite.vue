@@ -36,10 +36,24 @@ const removeData = (city: WeatherData) => {
     (item) => item.name !== city.name
   ));
   console.log(result);
-
+  isAdded(city);
   localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
   hideConfirmationModal();
   console.log("Data removed from favoriteCities:", favoriteCities.value);
+};
+
+const isAdded = (data: WeatherData) => {
+  const workspaceData = localStorage.getItem("WORKSPACE_DATA");
+  const LSData = JSON.parse(workspaceData ?? "[]");
+
+  for (const city of LSData) {
+    if (city.name === data.name) {
+      city.isFavorite = false;
+
+      break; // Місто знайдено, вийдіть з циклу, щоб оновити тільки перше збігове місто
+    }
+  }
+  localStorage.setItem("WORKSPACE_DATA", JSON.stringify(LSData));
 };
 </script>
 
