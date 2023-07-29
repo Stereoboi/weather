@@ -199,6 +199,6 @@ const removeData = (city: WeatherData) => {
 
 <style>
 .wrapper {
-  /* display: flex; */
+  display: flex;
 }
 </style>
