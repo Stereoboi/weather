@@ -3,7 +3,7 @@ import { onMounted, ref } from "vue";
 import { WeatherData } from "../../types/weatherFetch";
 import FavoriteCard from "../components/FavoriteCard.vue";
 import Modal from "../components/Modal.vue";
-
+import Chart from "../components/Chart.vue";
 const favoriteCities = ref<WeatherData[] | null>(null);
 const showModal = ref(false);
 const cityToDelete = ref<WeatherData | null>(null);
@@ -71,6 +71,7 @@ const isAdded = (data: WeatherData) => {
         <button @click="showConfirmationModal(el)">Remove from favorite</button>
       </template>
     </FavoriteCard>
+    <Chart :tempData="el.tempData" :name="el.name" />
   </div>
 
   <Modal

@@ -4,14 +4,14 @@ import Input from "../components/Input.vue";
 import Modal from "../components/Modal.vue";
 import Chart from "../components/Chart.vue";
 import { weatherFetch, dailyTempFetch } from "../helpers/weatherFetch";
-import { WeatherData } from "../../types/weatherFetch";
+import { WeatherData, WeatherItem } from "../../types/weatherFetch";
 import Card from "../components/Card.vue";
 import { onMounted } from "vue";
 import moment from "moment";
 // import Chart from "../components/Chart.vue";
 
 const cardData = ref<WeatherData | null>(null);
-const tempData = ref(null);
+const tempData = ref<WeatherItem[]>([]);
 const isDataLoaded = ref(false);
 const showModal = ref(false);
 const cityToDelete = ref<WeatherData | null>(null);
@@ -50,7 +50,7 @@ const findCity = async (city: string) => {
   console.log(resultTemp);
 
   cardData.value = result;
-  tempData.value = resultTemp;
+  tempData.value = resultTemp.list.slice(0, 8);
   isDataLoaded.value = true;
 };
 // функція додавання погодної картки до робочого середовища
@@ -66,6 +66,7 @@ const addDataToWorkspace = () => {
     }
 
     isFavorite(cardData.value);
+    cardData.value.tempData = tempData.value;
     console.log(cardData.value);
     workspaceCities.value.push(cardData.value);
     localStorage.setItem(
@@ -111,10 +112,13 @@ const addToFavorite = (data: WeatherData) => {
       alert("City already exists in favorites");
       return;
     }
+
+    if (!data.tempData) {
+      data.tempData = tempData.value;
+    }
     data.isFavorite = true;
 
     isAdded(data);
-
     favoriteCities.value.push(data);
     localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
     console.log("Data added to favoriteCities:", favoriteCities.value);
@@ -155,7 +159,6 @@ const removeData = (city: WeatherData) => {
 </script>
 
 <template>
-  <Chart :tempData="tempData" />
   <div>
     <h1>HOME PAGE</h1>
     <Input @findCity="findCity" />
@@ -168,6 +171,7 @@ const removeData = (city: WeatherData) => {
           <button @click="addToFavorite(cardData)">Add to favorite</button>
         </template>
       </Card>
+      <!-- <Chart :tempData="tempData" :name="cardData.name" /> -->
     </div>
     <p v-else-if="isDataLoaded">Sorry, no data available.</p>
   </div>
@@ -187,6 +191,7 @@ const removeData = (city: WeatherData) => {
           <span v-else>Added</span>
         </template>
       </Card>
+      <Chart :tempData="city.tempData" :name="city.name" />
     </div>
   </div>
 

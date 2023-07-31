@@ -1,5 +1,6 @@
 interface WeatherData {
   isFavorite: boolean;
+  tempData?: any[];
   coord: {
     lon: number;
     lat: number;
@@ -100,4 +101,4 @@ interface CityInfo {
   sunset: number;
 }
 
-export type { WeatherTempData, WeatherData };
+export type { WeatherTempData, WeatherData, WeatherItem };
