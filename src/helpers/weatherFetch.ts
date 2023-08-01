@@ -5,17 +5,17 @@ export const weatherFetch = async (city: string) => {
         import.meta.env.VITE_API_KEY
       }&limit=5`
     );
-    console.log(response);
+    // console.log(response);
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
 
       if (data.length === 0) {
         return;
       } else {
         // Обробка даних з бекенду
-        console.log("Отримані дані:", data);
+        // console.log("Отримані дані:", data);
         const { lat, lon } = data[0];
         const responseCurrentWeather = await fetch(
           `${import.meta.env.VITE_WEATHER_URL}?lat=${lat}&lon=${lon}&appid=${
@@ -44,17 +44,17 @@ export const dailyTempFetch = async (city: string) => {
         import.meta.env.VITE_API_KEY
       }&limit=5`
     );
-    console.log(response);
+    // console.log(response);
 
     if (response.ok) {
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
 
       if (data.length === 0) {
         return;
       } else {
         // Обробка даних з бекенду
-        console.log("Отримані дані:", data);
+        // console.log("Отримані дані:", data);
         const { lat, lon } = data[0];
         const responseCurrentWeather = await fetch(
           `${import.meta.env.VITE_FORECAST_URL}?lat=${lat}&lon=${lon}&appid=${

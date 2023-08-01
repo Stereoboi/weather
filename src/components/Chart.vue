@@ -2,20 +2,26 @@
 import { ref, onMounted, watch } from "vue";
 import Chart from "chart.js/auto";
 import moment from "moment";
+import { v4 as uuidv4 } from "uuid";
 
+const id = ref(null);
 const props = defineProps(["tempData", "name"]);
 let chartInstance = null;
 
-console.log(props.name);
+// console.log(props.tempData);
 
 const createLineChart = (canvas, data) => {
+  Chart.defaults.color = "#ffffff";
   const ctx = canvas.getContext("2d");
 
   const chartData = {
-    labels: data.map((item) => moment.unix(item.dt).format("MMMM Do , h")),
+    labels: data.map((item) => moment.unix(item.dt).format(" Do , h:mm")),
     datasets: [
       {
-        label: "Data Set",
+        label:
+          props.tempData.length > 6
+            ? "daytime temperature"
+            : "weekly temperature",
         data: data.map((item) => item.main.temp),
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 2,
@@ -28,10 +34,26 @@ const createLineChart = (canvas, data) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    scales: {
+      x: {
+        display: true,
+
+        ticks: {
+          color: "white",
+        },
+      },
+      y: {
+        display: true,
+
+        ticks: {
+          color: "white",
+        },
+      },
+    },
   };
 
   if (chartInstance) {
-    chartInstance.destroy(); // Знищуємо попередній графік, якщо він існує
+    chartInstance.destroy();
   }
 
   chartInstance = new Chart(ctx, {
@@ -63,6 +85,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
-/* Додайте стилі за необхідністю */
-</style>
+<style></style>

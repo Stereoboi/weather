@@ -6,8 +6,9 @@ import Chart from "../components/Chart.vue";
 import { weatherFetch, dailyTempFetch } from "../helpers/weatherFetch";
 import { WeatherData, WeatherItem } from "../../types/weatherFetch";
 import Card from "../components/Card.vue";
+
 import { onMounted } from "vue";
-import moment from "moment";
+
 // import Chart from "../components/Chart.vue";
 
 const cardData = ref<WeatherData | null>(null);
@@ -46,8 +47,8 @@ const findCity = async (city: string) => {
   const result = await weatherFetch(city);
   const resultTemp = await dailyTempFetch(city);
   // moment(resultTemp.list[0].dt).format("MMM Do YY");
-  console.log(moment.unix(resultTemp.list[2].dt).format("Do , h"));
-  console.log(resultTemp);
+  // console.log(moment.unix(resultTemp.list[2].dt).format("Do , h"));
+  // console.log(resultTemp);
 
   cardData.value = result;
   tempData.value = resultTemp.list.slice(0, 8);
@@ -67,13 +68,13 @@ const addDataToWorkspace = () => {
 
     isFavorite(cardData.value);
     cardData.value.tempData = tempData.value;
-    console.log(cardData.value);
+    // console.log(cardData.value);
     workspaceCities.value.push(cardData.value);
     localStorage.setItem(
       "WORKSPACE_DATA",
       JSON.stringify(workspaceCities.value)
     );
-    console.log("Data added to workspaceCities:", workspaceCities.value);
+    // console.log("Data added to workspaceCities:", workspaceCities.value);
   }
 };
 
@@ -91,7 +92,7 @@ isFavorite - ця функція використовується
 */
 
 const isFavorite = (data: WeatherData) => {
-  console.log(favoriteCities.value);
+  // console.log(favoriteCities.value);
 
   for (const city of favoriteCities.value) {
     if (city.name === data.name) {
@@ -121,7 +122,7 @@ const addToFavorite = (data: WeatherData) => {
     isAdded(data);
     favoriteCities.value.push(data);
     localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
-    console.log("Data added to favoriteCities:", favoriteCities.value);
+    // console.log("Data added to favoriteCities:", favoriteCities.value);
   }
 };
 
@@ -136,7 +137,7 @@ isAdded - ця функція використовується
 */
 
 const isAdded = (data: WeatherData) => {
-  console.log(workspaceCities.value);
+  // console.log(workspaceCities.value);
 
   for (const city of workspaceCities.value) {
     if (city.name === data.name) {
@@ -154,44 +155,57 @@ const removeData = (city: WeatherData) => {
   );
   localStorage.setItem("WORKSPACE_DATA", JSON.stringify(workspaceCities.value));
   hideConfirmationModal();
-  console.log("Data removed from workspaceCities:", workspaceCities.value);
+  // console.log("Data removed from workspaceCities:", workspaceCities.value);
 };
 </script>
 
 <template>
   <div>
-    <h1>HOME PAGE</h1>
     <Input @findCity="findCity" />
-    <div v-if="isDataLoaded && cardData">
+    <div v-if="isDataLoaded && cardData" class="search-card-wrapper">
       <Card :cardData="cardData" :hideButton="false">
         <template #add-button>
-          <button @click="addDataToWorkspace">Add to workspace</button>
+          <button @click="addDataToWorkspace" class="workspace-btn">
+            To workspace
+          </button>
         </template>
         <template #make-favorite>
-          <button @click="addToFavorite(cardData)">Add to favorite</button>
+          <button @click="addToFavorite(cardData)" class="favorite-btn">
+            To favorite
+          </button>
         </template>
       </Card>
-      <!-- <Chart :tempData="tempData" :name="cardData.name" /> -->
     </div>
     <p v-else-if="isDataLoaded">Sorry, no data available.</p>
   </div>
-  <div v-if="workspaceCities.length > 0" class="wrapper">
-    <h2>Chosen Cities</h2>
-    <div v-for="city in workspaceCities" :key="city.name">
-      <Card :cardData="city" :hideButton="true">
-        <template #remove-workspace>
-          <button @click="showConfirmationModal(city)">
-            remove from workspace
-          </button>
-        </template>
-        <template #make-favorite-ws>
-          <button v-if="!city.isFavorite" @click="addToFavorite(city)">
-            Add to favorite
-          </button>
-          <span v-else>Added</span>
-        </template>
-      </Card>
-      <Chart :tempData="city.tempData" :name="city.name" />
+  <div v-if="workspaceCities.length > 0">
+    <h2 class="title">Workspace</h2>
+    <div class="workspace-wrapper">
+      <div v-for="city in workspaceCities" :key="city.name">
+        <div class="workspace-card-wrapper">
+          <Card :cardData="city" :hideButton="true">
+            <template #remove-workspace>
+              <button
+                @click="showConfirmationModal(city)"
+                class="workspace-btn"
+              >
+                Remove
+              </button>
+            </template>
+            <template #make-favorite-ws>
+              <button
+                v-if="!city.isFavorite"
+                @click="addToFavorite(city)"
+                class="favorite-btn"
+              >
+                Add to favorite
+              </button>
+              <span v-else class="favorite-msg">Added to favorite</span>
+            </template>
+          </Card>
+          <Chart :tempData="city.tempData" :name="city.name" />
+        </div>
+      </div>
     </div>
   </div>
 
@@ -203,7 +217,83 @@ const removeData = (city: WeatherData) => {
 </template>
 
 <style>
-.wrapper {
-  display: flex;
+.title {
+  text-align: center;
+  color: rgb(30, 37, 49);
+}
+.search-card-wrapper {
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  color: white;
+  padding: 25px;
+  background-color: rgb(80, 96, 121);
+  border-radius: 8px;
+  max-width: 500px;
+}
+
+.workspace-wrapper {
+  margin-top: 30px;
+  margin-bottom: 30px;
+
+  @media only screen and (min-width: 1024px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-column-gap: 1px;
+    grid-row-gap: 1em;
+  }
+}
+
+.workspace-card-wrapper {
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 10px;
+  color: white;
+  padding: 25px;
+  background-color: rgb(80, 96, 121);
+  border-radius: 8px;
+  max-width: 500px;
+  @media only screen and (min-width: 1024px) {
+    margin-bottom: 0px;
+  }
+}
+
+button {
+  font-size: 16px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: rgb(80, 96, 121);
+  color: white;
+}
+
+button:hover {
+  background-color: rgb(47, 60, 79);
+}
+
+.workspace-btn {
+  color: #ffffff;
+  background-color: rgb(47, 60, 79);
+}
+
+.workspace-btn:hover {
+  background-color: rgb(27, 35, 48);
+}
+
+.favorite-btn {
+  background-color: rgb(47, 60, 79);
+  color: #ffffff;
+}
+
+.favorite-btn:hover {
+  background-color: rgb(27, 35, 48);
+}
+
+.favorite-msg {
+  color: rgba(75, 192, 192, 1);
+  background-color: rgb(47, 60, 79);
+  padding: 10px;
+  border-radius: 8px;
 }
 </style>

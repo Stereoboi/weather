@@ -9,7 +9,7 @@ export const cityFetch = async (city: any) => {
       if (response.ok) {
         const data = await response.json();
         // Обробка даних з бекенду
-        console.log("Отримані дані:", data);
+        // console.log("Отримані дані:", data);
 
         return data;
       } else {

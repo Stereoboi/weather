@@ -1,1 +1,10 @@
 @import "node_modules/modern-normalize/modern-normalize.css";
+
+body,
+html {
+  font-family: "Palanquin Dark", sans-serif;
+  background-color: rgb(108, 123, 146);
+  @media only screen and (min-width: 1024px) {
+    /* font-size: 20px; */
+  }
+}
