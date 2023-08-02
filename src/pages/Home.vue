@@ -6,7 +6,7 @@ import Chart from "../components/Chart.vue";
 import { weatherFetch, dailyTempFetch } from "../helpers/weatherFetch";
 import { WeatherData, WeatherItem } from "../../types/weatherFetch";
 import Card from "../components/Card.vue";
-
+import { notify } from "@kyvg/vue3-notification";
 import { onMounted } from "vue";
 
 // import Chart from "../components/Chart.vue";
@@ -55,14 +55,30 @@ const findCity = async (city: string) => {
   isDataLoaded.value = true;
 };
 // функція додавання погодної картки до робочого середовища
+
 const addDataToWorkspace = () => {
-  if (cardData.value && workspaceCities.value.length <= 4) {
+  const maxCities = 5; // Максимальна кількість міст у робочому просторі
+
+  if (cardData.value && workspaceCities.value.length >= maxCities) {
+    notify({
+      type: "warn",
+      title: "Storage limit",
+      text: "Cannot add more cities to workspace. Maximum limit reached.",
+    });
+    return;
+  }
+
+  if (cardData.value) {
     const cityExists = workspaceCities.value.some(
       (city) => city && city.name === cardData.value!.name
     );
 
     if (cityExists) {
-      alert("City already exists in workspace");
+      notify({
+        type: "warn",
+        title: "Warning",
+        text: "City already exists in workspace",
+      });
       return;
     }
 
@@ -74,7 +90,11 @@ const addDataToWorkspace = () => {
       "WORKSPACE_DATA",
       JSON.stringify(workspaceCities.value)
     );
-    // console.log("Data added to workspaceCities:", workspaceCities.value);
+    notify({
+      type: "success",
+      title: "Success",
+      text: "City has been added to workspace",
+    });
   }
 };
 
@@ -104,26 +124,44 @@ const isFavorite = (data: WeatherData) => {
 };
 
 const addToFavorite = (data: WeatherData) => {
-  if (favoriteCities.value.length <= 4) {
-    const cityExists = favoriteCities.value.some(
-      (city) => city.name === data.name
-    );
+  const maxCities = 5;
 
-    if (cityExists) {
-      alert("City already exists in favorites");
-      return;
-    }
-
-    if (!data.tempData) {
-      data.tempData = tempData.value;
-    }
-    data.isFavorite = true;
-
-    isAdded(data);
-    favoriteCities.value.push(data);
-    localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
-    // console.log("Data added to favoriteCities:", favoriteCities.value);
+  if (favoriteCities.value.length >= maxCities) {
+    notify({
+      type: "warn",
+      title: "Storage limit",
+      text: "Cannot add more cities. Maximum limit reached.",
+    });
+    return;
   }
+
+  const cityExists = favoriteCities.value.some(
+    (city) => city.name === data.name
+  );
+
+  if (cityExists) {
+    notify({
+      type: "warn",
+      title: "Storage limit",
+      text: "City already exists in favorites",
+    });
+    return;
+  }
+
+  if (!data.tempData) {
+    data.tempData = tempData.value;
+  }
+  data.isFavorite = true;
+
+  isAdded(data);
+  favoriteCities.value.push(data);
+  localStorage.setItem("FAVORITE_DATA", JSON.stringify(favoriteCities.value));
+  notify({
+    type: "success",
+    title: "Success",
+    text: "City has been added to favorites",
+  });
+  // console.log("Data added to favoriteCities:", favoriteCities.value);
 };
 
 /*
