@@ -1,7 +1,7 @@
 <template>
   <div class="navbar-container">
     <nav class="navbar">
-      <p>Weather</p>
+      <p class="logo">Weather</p>
       <router-link
         :to="{ name: 'Home' }"
         class="link"
